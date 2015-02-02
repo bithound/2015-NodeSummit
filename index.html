@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>bitHound</title>
+
+		<meta name="description" content="">
+		<meta name="author" content="bitHound">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<link rel="icon" href="img/symbol_colour.png" type="image/x-icon">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/bithound.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+    <script src="http://localhost:35729/livereload.js?snipver=1"></script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+
+				<section class="main-title" data-background="img/symbol_reversed.svg" data-background-size="150%">
+					<img src="img/fulllogo_reversed.svg" class="simple-img full-logo" />
+					<h3>Why would we ever build a distributed computing platform in Node?</h3>
+					<p>
+						<small>Presented by Gord Tanner</small><br />
+						<a href="http://bithound.io">bithound.io</a> / <a href="http://twitter.com/bithoundio">@bithoundio</a>
+					</p>	
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+					<h2>Who are we?</h2>
+          <h3><a href="http://bithound.io">bithound.io</a></h3>
+          </br>
+          <ul>
+            <li>Gord Tanner (<a href="http://twitter.com/gordtanner">@gordtanner</a>)</li>
+          </ul>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+					<h2>What do we do?</h2>
+          <p>Code quality, maintainability, and stability for all of your public and private project repositories.
+          </p>
+          <img src="img/commit-graph.png" alt="">
+          <br />
+          <a href="http://bithound.io">bitHound.io</a>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+					<h2>Waiting sucks</h2>
+          <img src="img/waiting.jpg" alt="" />
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+					<h2>Problem:</h2>
+          <pre>
+                      > time jshint .
+
+                      ---------------------
+                      (lots of errors here)
+                      ---------------------
+
+                      7368 errors
+
+                      real  0m29.321s
+                      user  0m28.627s
+                      sys 0m0.508s
+
+          </pre>
+          <h5 style="text-align: left;">- Do this for 1K+ commits in a project</h5>
+          <h5 style="text-align: left;">- There are many more things to look at</h5>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>Why JavaScript?</h2>
+          <img width="50%" src="img/gopherbw.png" alt="">
+				</section>
+
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <img src="img/tinyhippos.png" alt="" width="60%" />
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <img src="img/ripple.png" alt="">
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h1>concurrency</h1>
+          In computer science, concurrency is a property of systems in which several <i style="color: red">computations are executing simultaneously</i>,
+          and <i style="color: red;">potentially interacting</i> with each other. The computations may be executing on multiple cores in the same chip, preemptively time-shared threads on the same processor, or executed on physically separated processors.
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>Shared Memory</h2>
+          Concurrent components communicate by <i style="color: red;">altering</i> the contents
+          of <i style="color: red;">shared memory</i> locations (exemplified by Java and C#). This style of concurrent programming
+          usually requires the application of <i style="color: red;">some form of locking</i>
+          (e.g., mutexes, semaphores, or monitors) to coordinate between threads.
+          A program that properly implements any of these is said to be
+          <i style="color: red;">thread-safe </i>.
+          <small>
+            <a href="http://en.wikipedia.org/wiki/Concurrent_computing">http://en.wikipedia.org/wiki/Concurrent_computing</a>
+          </small>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>Message Passing</h2>
+          Concurrent components communicate by <i style="color: red;">exchanging messages</i>
+          (exemplified by Scala, Erlang and occam). The exchange of messages may
+          be carried out <i style="color: red;">asynchronously</i>, or may use a <i style="color: red;">synchronous</i> "rendezvous" style
+          in which the sender blocks until the message is received.
+          Asynchronous message passing may be <i style="color: red;">reliable or unreliable</i>
+          (sometimes referred to as "send and pray"). Message-passing concurrency
+          tends to be far easier to reason about than shared-memory concurrency, and is typically considered a more robust form of concurrent programming.
+
+          <br/>
+          <small>
+            <a href="http://en.wikipedia.org/wiki/Concurrent_computing">http://en.wikipedia.org/wiki/Concurrent_computing</a>
+          </small>
+          <aside class="notes">
+            Oh hey, these are some notes. They'll be hidden in your presentation, but you can see them if you open the speaker notes window (hit 's' on your keyboard).
+          </aside>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <b>
+            Node is a platform for easily building fast, <i style="color: red;">scalable network applications. </i>
+            Node uses an event-driven, non-blocking I/O model that makes it lightweight and efficient, 
+            perfect for <i style="color: red;">data-intensive</i> real-time applications that run across <i style="color: red;">distributed devices</i>.
+          </b>
+          <br />
+          <small><a href="http://nodejs.org/">http://nodejs.org/</a></small>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+        <h3>The cost of I/O</h3>
+
+          <pre style="font-size: 1em;">
+    L1-cache                  3 cycles
+    L2-cache                 14 cycles
+    RAM                     250 cycles
+    Disk             41 000 000 cycles
+    Network         240 000 000 cycles
+
+          </pre>
+          <a href="http://blog.mixu.net/2011/02/01/understanding-the-node-js-event-loop/">http://blog.mixu.net/2011/02/01/understanding-the-node-js-event-loop/</a>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>Async IO</h2>
+          <img src="img/event-loop.jpg" alt="">
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+        <pre>
+        function fibonacci(n) {
+          if (n < 2)
+            return 1;
+          else
+            return fibonacci(n-2) + fibonacci(n-1);
+        }
+
+        http.createServer(function (req, res) {
+          res.writeHead(200, {'Content-Type': 'text/plain'});
+          res.end(fibonacci(40));
+        }).listen(1337, "127.0.0.1");
+        </pre>
+
+        <a href="https://www.semitwist.com/mirror/node-js-is-cancer.html">https://www.semitwist.com/mirror/node-js-is-cancer.html</a>
+        </section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>Am i going to "create" another distributed framework?</h2>
+          <img src="img/npm.png" alt="">
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <img src="img/no.gif" alt="">
+          <p>"this is a very personal choice"</p>
+          <aside class="notes">
+          It is a very personal choice, choose the tools that work for you, the network design that
+          works for you.
+          </aside>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <img src="img/zeromq.png" alt="" />
+          <blockquote>ØMQ looks like an embeddable networking library but acts like a concurrency framework.</blockquote>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <pre>
+                  .------------.        .--------------.
+                  |            |        |              |
+                  | TCP socket +------->|              | ZAP!
+                  |            | BOOM!  |  0MQ socket  |
+                  '------------'        |              |  POW!!
+                    ^    ^    ^         |              |
+                    |    |    |         '--------------'
+                    |    |    |
+                    |    |    |
+                    |    |    '--------- Spandex
+                    |    |
+                    |    '-------------- Cosmic rays
+
+                   Illegal radioisotopes from
+                   secret Soviet atomic city
+          </pre>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+        <h2>Sockets that carry <i style='color: red;'>atomic messages</i> across various <i style='color: red;'>transports</i> like:</h2>
+          <ul>
+            <li>in-process</li>
+            <li>inter-process (shared memory)</li>
+            <li>TCP</li>
+            <li>multicast</li>
+          </ul>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+        <h2>You can <i style='color: red'>connect</i> sockets <i style='color: red;'>N-to-N</i> with patterns like</h2>
+            <ul>
+              <li>fan-out, fan-in</li>
+              <li>publish-subscribe</li>
+              <li>task distribution</li>
+              <li>request-reply</li>
+            </ul>
+          </section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>Tasks</h2>
+          <img src="img/mission.png" alt="">
+
+          <aside class="notes">
+            <ul>
+              <li>Think of the atomic chunks of work in your app</li>
+              <li>You are probably wrong</li>
+            </ul>
+          </aside>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <ul>
+            <li>understand your project</li>
+            <li>assess your applications needs</li>
+            <li>only then define your tasks</li>
+          </ul>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>Roles</h2>
+          <pre>
+                   .------------.             .------------.
+                   |            |             |            |
+                   |   MASTER   |             |   SLAVE    |
+                   |            |             |            |
+                   .------------.             .------------.
+
+                   - starts jobs              - works on jobs
+                   - breaks down work
+                   - listens to status
+
+          </pre>
+				</section>
+        
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <pre>
+     .------------. Hey, can you do this thing for me?  .------------.
+     |            |------------------------------------>|            |
+     |   MASTER   |  Sure! here you go buddy            |   SLAVE    |
+     |            |<------------------------------------|            |
+     '------------'                                     '------------'
+          </pre>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <pre>
+                                                           .------------.
+                                                          .------------.|
+                                                         .------------.||
+     .------------.  here are a bunch of things to do!  .------------.|||
+     |            |------------------------------------>|            |||'
+     |   MASTER   |  Sure! here you go buddy            |   SLAVE    ||'
+     |            |<------------------------------------|            |'
+     '------------'                                     '------------'
+          </pre>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <pre>
+
+     .--------. do this!     .-------. thats a lot of work! .-------.
+     |        |------------->|       |  can you help me?    |       |
+     | MASTER |  here you go | SLAVE |--------------------->| SLAVE |
+     |        |<-------------|       |<---------------------|       |
+     '--------'              '-------'                      '-------'
+          </pre>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <pre>
+          .what is the difference?.
+          |                       |
+          V                       V
+     .--------. do this!     .-------. thats a lot of work! .-------.
+     |        |------------->|       |  can you help me?    |       |
+     | MASTER |  here you go | SLAVE |--------------------->| SLAVE |
+     |        |<-------------|       |<---------------------|       |
+     '--------'              '-------'                      '-------'
+     
+          </pre>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h3>There is no difference</h3>
+          <pre>
+     .--------. do this!     .--------. thats a lot of work! .--------.
+     |        |------------->|        |  can you help me?    |        |
+     | WORKER |  here you go | WORKER |--------------------->| WORKER |
+     |        |<-------------|        |<---------------------|        |
+     '--------'              '--------'                      '--------'
+     
+          </pre>
+          <aside class="notes">
+          Except some people jsut want to tell others to do work and not work themselves (ie our webserver)
+          </aside>
+				</section>
+
+
+        <section data-transition="none" data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <pre>
+            <span style="color: red;margin: 0;padding: 0;">var farm = require('farm');</span>
+
+            // I need someone to do something for me
+            var task = {};
+            farm.jobs.send(task, function (err, result) { });
+
+            // I have a bunch stuff people can work on for me
+            var jobs = [j1, j2, j3, j4, .....];
+            farm.jobs.distribute(tasks, function (err, result) { });
+
+            // global cluster pub / sub 
+            farm.events.publish('new_sha', {sha: '', owner: '', repo: ''});
+            farm.events.subscribe('new_sha', function (event) { });
+
+            farm.worker(function (task, callback) {
+               //do stuff
+               callback(err, result);
+            });
+          </pre>
+				</section>
+
+        <section data-transition="none" data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <pre>
+            var farm = require('farm');
+
+           <span style="color: red; margin: 0;padding: 0;"> // I need someone to do something for me
+            var task = {};
+            farm.jobs.send(task, function (err, result) { });</span>
+
+            // I have a bunch stuff people can work on for me
+            var jobs = [j1, j2, j3, j4, .....];
+            farm.jobs.distribute(tasks, function (err, result) { });
+
+            // global cluster pub / sub 
+            farm.events.publish('new_sha', {sha: '', owner: '', repo: ''});
+            farm.events.subscribe('new_sha', function (event) { });
+
+            farm.worker(function (task, callback) {
+               //do stuff
+               callback(err, result);
+            });
+          </pre>
+				</section>
+
+        <section data-transition="none" data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <pre>
+            var farm = require('farm');
+
+            // I need someone to do something for me
+            var task = {};
+            farm.jobs.send(task, function (err, result) { });
+
+            <span style="color: red;">// I have a bunch stuff people can work on for me
+            var jobs = [j1, j2, j3, j4, .....];
+            farm.jobs.distribute(tasks, function (err, result) { });</span>
+
+            // global cluster pub / sub 
+            farm.events.publish('new_sha', {sha: '', owner: '', repo: ''});
+            farm.events.subscribe('new_sha', function (event) { });
+
+            farm.worker(function (task, callback) {
+               //do stuff
+               callback(err, result);
+            });
+          </pre>
+				</section>
+
+        <section data-transition="none" data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <pre>
+            var farm = require('farm');
+
+            // I need someone to do something for me
+            var task = {};
+            farm.jobs.send(task, function (err, result) { });
+
+            // I have a bunch stuff people can work on for me
+            var jobs = [j1, j2, j3, j4, .....];
+            farm.jobs.distribute(tasks, function (err, result) { });
+
+            <span style="color: red;">// global cluster pub / sub 
+            farm.events.publish('new_sha', {sha: '', owner: '', repo: ''});
+            farm.events.subscribe('new_sha', function (event) { });</span>
+
+            farm.worker(function (task, callback) {
+               //do stuff
+               callback(err, result);
+            });
+          </pre>
+				</section>
+
+        <section data-transition="none" data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <pre>
+            var farm = require('farm');
+
+            // I need someone to do something for me
+            var task = {};
+            farm.jobs.send(task, function (err, result) { });
+
+            // I have a bunch stuff people can work on for me
+            var jobs = [j1, j2, j3, j4, .....];
+            farm.jobs.distribute(tasks, function (err, result) { });
+
+            // global cluster pub / sub 
+            farm.events.publish('new_sha', {sha: '', owner: '', repo: ''});
+            farm.events.subscribe('new_sha', function (event) { });
+
+            <span style="color: red;">farm.worker(function (task, callback) {
+               //do stuff
+               callback(err, result);
+            });</span>
+          </pre>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>Launch Day!</h2>
+          <img width="50%" src="img/twilight.png" alt="">
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>what works on one machine well, doesn't always work as well on 200 machines</h2>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>Dev Env (on OSX)</h2>
+          <pre>
+                               #-------------#
+                               |             |
+                               |   WEB APP   |
+                               |             |
+                               '-------------'
+                                      |
+                                      v               
+                                .------------.
+                                |            |
+                                |   BROKER   |
+                                |            |
+                                #------------#
+                                      |
+                                      v               
+                                .------------.
+                                |            |
+                                |   WORKER   |
+                                |            |
+                                #------------#
+
+          </pre>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>Prod Env</h2>
+          <pre>
+                               #-------------#
+                               |             |
+                               |   WEB APP   |
+                               |             |
+                               '-------------'
+                                      |
+                                      v               
+                                .------------.
+                                |            |
+                                |   BROKER   |
+                                |            |
+                                #------------#
+                                      |
+                                .------------.
+                                |  100s OF   |
+                                |   BOXES    |
+                                '------------'
+                                      |
+                      .---------------+---------------.
+                      |               |               |
+                      v               v               v
+                .------------.  .------------.  .------------.
+                |            |  |            |  |            |
+                |   WORKER   |  |   WORKER   |  |   WORKER   |
+                |            |  |            |  |            |
+                #------------#  #------------#  #------------#
+
+          </pre>
+          <aside class="notes">
+          <ul>
+            <li>100s of boxes that didn't talk to each other</li>
+            <li>100s of boxes that tried to all clone at the same time</li>
+            <li>all of our "sharing" code assumptions were wrong</li>
+          </ul>
+          </aside>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <img src="img/vagrant.png" alt="">
+          <a href="https://www.vagrantup.com/">https://www.vagrantup.com/</a>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <img src="img/vagrant_status.png" alt="">
+          <p><b style="color: red;">PROTIP:</b> If you are developing a distributed application, you should work in a distributed environment</p>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <img src="img/cattle.png" alt="">
+          <h2>Pets or Cattle?</h2>
+          <aside class="notes">
+            <ul>
+              <li>Services</li>
+              <li>Computers</li>
+              <li>Jobs</li>
+            </ul>
+          </aside>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <img src="img/failure-option.jpg" alt="">
+          <aside class="notes">
+          You should expect things to fail.  If something fails, just try again. Schedule for it to run later or try right away.
+          If it keeps failing then you can look into it.
+          </aside>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>Rube Goldberg Machine</h2>
+            <img src="img/cli.png" width="40%" alt="">
+          <aside class="notes">
+            UNIX WAY.
+
+            Develop a series of tools that can be chained together and run atomically
+          </aside>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>You are the one</h2>
+          <img src="img/machine.gif" alt="">
+          <small>"The function of the One is now to return to the Source allowing a temporary dissimination of the code you carry reinserting the Prime Program." - The Architect</small>
+				</section>
+
+        <section data-background="img/symbol_reversed.svg" data-background-size="70%" data-background-position="120%">
+          <h2>So why node?</h2>
+          <img src="img/glue.gif" alt="">
+          <aside class="notes">
+          <ul>
+            <li>Async IO and simple concurrency</li>
+            <li> it was an amazing languages to quickly glue a wide array of tools and programs together.  </li>
+            <li>command line integration was awesome</li>
+          </ul>
+          </aside>
+				</section>
+
+				<section class="main-title" data-background="img/symbol_reversed.svg" data-background-size="150%">
+					<img src="img/fulllogo_reversed.svg" class="simple-img full-logo" />
+					<h2>Thank you!</h2>
+          <h3><a href="http://bithound.io">bithound.io</a></h3>
+          <ul>
+            <li>Gord Tanner (<a href="http://twitter.com/gordtanner">@gordtanner</a>)</li>
+          </ul>
+          </br>
+          </br>
+					<p>
+						<small><a href="http://bithound.io">bithound.io</a> / <a href="http://twitter.com/bithoundio">@bithoundio</a></small>
+					</p>	
+				</section>
+			</div>
+
+		</div>
+		<div class="footer">
+      <!--<img src="img/wordmark_grey_reversed.svg" class="simple-img wordmark" />-->
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+    <!-- Live reload -->
+
+	</body>
+</html>
